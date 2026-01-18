@@ -1,20 +1,23 @@
-import { addVisit } from "./actions";
+import { unstable_noStore as noStore } from "next/cache";
+import { addVisit, deleteVisit, updateVisit } from "./actions";
+import EditVisitModal from "./EditVisitModal";
+import LogVisitModal from "./LogVisitModal";
 import { createSupabaseServerClient } from "../lib/supabaseServer";
 
 export default async function Home() {
+  noStore();
+
   const dateFormatter = new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
-  const nextVisitGoal = new Date("2026-01-19");
-
   const supabase = createSupabaseServerClient();
   const { data } = await supabase
     .from("restaurant_visits")
     .select(
-      "id, restaurant_name, neighborhood, visited_on, rating, notes, return_plan, photo_url, created_at"
+      "id, restaurant_name, neighborhood, visited_on, wesley_rating, claire_rating, notes, photo_url, created_at"
     )
     .order("visited_on", { ascending: false })
     .order("created_at", { ascending: false });
@@ -25,10 +28,14 @@ export default async function Home() {
     neighborhood: entry.neighborhood,
     date: entry.visited_on ? new Date(entry.visited_on) : null,
     note: entry.notes,
-    rating: entry.rating,
-    returnPlan: entry.return_plan,
+    wesleyRating: entry.wesley_rating,
+    claireRating: entry.claire_rating,
     photoUrl: entry.photo_url,
   }));
+
+  const neighborhoodsCovered = new Set(
+    entries.map((entry) => entry.neighborhood).filter(Boolean)
+  ).size;
 
   return (
     <>
@@ -41,108 +48,17 @@ export default async function Home() {
           <div>
             <p className="eyebrow">Atlanta Restaurant Log</p>
             <h1>Two weeks. One new table. Every time.</h1>
-            <p className="subtitle">
-              Track your Atlanta food adventures with photos, ratings, and the
-              little moments worth remembering.
-            </p>
-          </div>
-          <div className="status-card">
-            <div className="status-row">
-              <span className="label">Next visit goal</span>
-              <span className="value">
-                {dateFormatter.format(nextVisitGoal)}
-              </span>
-            </div>
-            <div className="progress">
-              <div className="progress-bar" style={{ width: "62%" }}></div>
-            </div>
-            <div className="status-row">
-              <span className="label">Current streak</span>
-              <span className="value">4 visits</span>
-            </div>
-            <div className="status-row">
-              <span className="label">Neighborhoods covered</span>
-              <span className="value">6</span>
+            <div className="hero-actions">
+              <div className="hero-metrics">
+                <span>{entries.length} places logged</span>
+                <span>{neighborhoodsCovered} neighborhoods</span>
+              </div>
+              <LogVisitModal action={addVisit} />
             </div>
           </div>
         </header>
 
-        <section className="grid">
-          <div className="panel">
-            <h2>Log a New Restaurant</h2>
-            <form
-              className="log-form"
-              autoComplete="off"
-              action={addVisit}
-              encType="multipart/form-data"
-            >
-              <label className="field">
-                <span>Restaurant name</span>
-                <input
-                  type="text"
-                  name="restaurantName"
-                  autoComplete="off"
-                  placeholder="e.g. Miller Union…"
-                />
-              </label>
-              <div className="field-row">
-                <label className="field">
-                  <span>Date</span>
-                  <input type="date" name="visitDate" autoComplete="off" />
-                </label>
-                <label className="field">
-                  <span>Neighborhood</span>
-                  <input
-                    type="text"
-                    name="neighborhood"
-                    autoComplete="off"
-                    placeholder="e.g. West Midtown…"
-                  />
-                </label>
-              </div>
-              <label className="field">
-                <span>Rating</span>
-                <div className="rating">
-                  {[5, 4, 3, 2, 1].map((value) => (
-                    <label className="rating-pill" key={value}>
-                      <input type="radio" name="rating" value={value} />
-                      <span>{value}</span>
-                    </label>
-                  ))}
-                </div>
-              </label>
-              <label className="field">
-                <span>Return plan</span>
-                <select name="returnPlan" defaultValue="">
-                  <option value="" disabled>
-                    Pick a vibe…
-                  </option>
-                  <option value="yes">Yes</option>
-                  <option value="date night">Date night</option>
-                  <option value="group">Group outing</option>
-                  <option value="maybe">Maybe</option>
-                </select>
-              </label>
-              <label className="field">
-                <span>Thoughts</span>
-                <textarea
-                  rows="4"
-                  name="notes"
-                  autoComplete="off"
-                  placeholder="Best bites, vibes, and the dish we'd order again…"
-                ></textarea>
-              </label>
-              <label className="field file">
-                <span>Upload a photo</span>
-                <input type="file" accept="image/*" name="mealPhoto" />
-                <span className="file-cta">Choose a meal photo</span>
-              </label>
-              <button type="submit" className="primary-btn">
-                Add This Visit
-              </button>
-            </form>
-          </div>
-
+        <section className="grid single">
           <div className="panel">
             <div className="panel-head">
               <h2>Latest Adventures</h2>
@@ -179,11 +95,33 @@ export default async function Home() {
                       </p>
                       <div className="entry-footer">
                         <span className="chip">
-                          Rating {entry.rating ?? "N/A"}
+                          Wesley {entry.wesleyRating ?? "N/A"}
                         </span>
                         <span className="chip">
-                          Go back: {entry.returnPlan ?? "unsure"}
+                          Claire {entry.claireRating ?? "N/A"}
                         </span>
+                      </div>
+                      <div className="entry-actions">
+                        <EditVisitModal
+                          action={updateVisit}
+                          initialValues={{
+                            id: entry.id,
+                            restaurantName: entry.name,
+                            neighborhood: entry.neighborhood ?? "",
+                            visitDate: entry.date
+                              ? entry.date.toISOString().split("T")[0]
+                              : "",
+                            wesleyRating: entry.wesleyRating,
+                            claireRating: entry.claireRating,
+                            notes: entry.note ?? "",
+                          }}
+                        />
+                        <form action={deleteVisit}>
+                          <input type="hidden" name="id" value={entry.id} />
+                          <button type="submit" className="ghost-btn danger">
+                            Delete
+                          </button>
+                        </form>
                       </div>
                     </div>
                   </article>

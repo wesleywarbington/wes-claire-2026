@@ -16,6 +16,9 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata = {
   title: "Atlanta Bites Tracker",
   description: "Track new restaurants, ratings, and meal photos in Atlanta.",
+};
+
+export const viewport = {
   themeColor: "#fff7ee",
 };
 

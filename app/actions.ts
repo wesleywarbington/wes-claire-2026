@@ -3,13 +3,21 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "../lib/supabaseServer";
 
-const normalizeText = (value) => {
+type ActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+const normalizeText = (value: FormDataEntryValue | null) => {
   if (!value) return null;
   const trimmed = value.toString().trim();
   return trimmed.length > 0 ? trimmed : null;
 };
 
-export async function addVisit(prevState, formData) {
+export async function addVisit(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   const supabase = createSupabaseServerClient();
 
   const restaurantName = normalizeText(formData.get("restaurantName"));
@@ -19,6 +27,10 @@ export async function addVisit(prevState, formData) {
   const claireRatingValue = normalizeText(formData.get("claireRating"));
   const notes = normalizeText(formData.get("notes"));
   const photoUrl = normalizeText(formData.get("photoUrl"));
+  const placeId = normalizeText(formData.get("placeId"));
+  const placeAddress = normalizeText(formData.get("placeAddress"));
+  const placeLatValue = normalizeText(formData.get("placeLat"));
+  const placeLngValue = normalizeText(formData.get("placeLng"));
 
   if (!restaurantName || !visitDate) {
     return { status: "error", message: "Add a name and date to log a visit." };
@@ -32,6 +44,10 @@ export async function addVisit(prevState, formData) {
     claire_rating: claireRatingValue ? Number(claireRatingValue) : null,
     notes,
     photo_url: photoUrl,
+    place_id: placeId,
+    place_address: placeAddress,
+    place_lat: placeLatValue ? Number(placeLatValue) : null,
+    place_lng: placeLngValue ? Number(placeLngValue) : null,
   });
 
   if (error) {
@@ -42,7 +58,10 @@ export async function addVisit(prevState, formData) {
   return { status: "success", message: "Visit saved. Great pick!" };
 }
 
-export async function updateVisit(prevState, formData) {
+export async function updateVisit(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   const supabase = createSupabaseServerClient();
   const id = normalizeText(formData.get("id"));
 
@@ -57,6 +76,10 @@ export async function updateVisit(prevState, formData) {
   const claireRatingValue = normalizeText(formData.get("claireRating"));
   const notes = normalizeText(formData.get("notes"));
   const photoUrl = normalizeText(formData.get("photoUrl"));
+  const placeId = normalizeText(formData.get("placeId"));
+  const placeAddress = normalizeText(formData.get("placeAddress"));
+  const placeLatValue = normalizeText(formData.get("placeLat"));
+  const placeLngValue = normalizeText(formData.get("placeLng"));
 
   if (!restaurantName || !visitDate) {
     return { status: "error", message: "Add a name and date to save changes." };
@@ -69,6 +92,10 @@ export async function updateVisit(prevState, formData) {
     wesley_rating: wesleyRatingValue ? Number(wesleyRatingValue) : null,
     claire_rating: claireRatingValue ? Number(claireRatingValue) : null,
     notes,
+    place_id: placeId,
+    place_address: placeAddress,
+    place_lat: placeLatValue ? Number(placeLatValue) : null,
+    place_lng: placeLngValue ? Number(placeLngValue) : null,
   };
 
   if (photoUrl) {
@@ -88,7 +115,7 @@ export async function updateVisit(prevState, formData) {
   return { status: "success", message: "Visit updated." };
 }
 
-export async function deleteVisit(formData) {
+export async function deleteVisit(formData: FormData) {
   const supabase = createSupabaseServerClient();
   const id = normalizeText(formData.get("id"));
 

@@ -17,7 +17,7 @@ export default async function Home() {
   const { data } = await supabase
     .from("restaurant_visits")
     .select(
-      "id, restaurant_name, neighborhood, visited_on, wesley_rating, claire_rating, notes, photo_url, created_at"
+      "id, restaurant_name, neighborhood, visited_on, wesley_rating, claire_rating, notes, photo_url, place_id, place_address, place_lat, place_lng, created_at"
     )
     .order("visited_on", { ascending: false })
     .order("created_at", { ascending: false });
@@ -31,6 +31,10 @@ export default async function Home() {
     wesleyRating: entry.wesley_rating,
     claireRating: entry.claire_rating,
     photoUrl: entry.photo_url,
+    placeId: entry.place_id,
+    placeAddress: entry.place_address,
+    placeLat: entry.place_lat,
+    placeLng: entry.place_lng,
   }));
 
   const neighborhoodsCovered = new Set(
@@ -86,6 +90,26 @@ export default async function Home() {
                       <p className="entry-meta">
                         {entry.neighborhood || "Atlanta"} ·{" "}
                         {entry.date ? dateFormatter.format(entry.date) : "TBD"}
+                        {entry.placeId || entry.placeLat ? (
+                          <>
+                            {" "}
+                            ·{" "}
+                            <a
+                              className="entry-map"
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                entry.placeAddress || entry.name
+                              )}${
+                                entry.placeId
+                                  ? `&query_place_id=${entry.placeId}`
+                                  : ""
+                              }`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Map
+                            </a>
+                          </>
+                        ) : null}
                       </p>
                       <p className="entry-note">
                         {entry.note || "No notes yet."}
@@ -117,6 +141,10 @@ export default async function Home() {
                             wesleyRating: entry.wesleyRating,
                             claireRating: entry.claireRating,
                             notes: entry.note ?? "",
+                            placeId: entry.placeId ?? "",
+                            placeAddress: entry.placeAddress ?? "",
+                            placeLat: entry.placeLat,
+                            placeLng: entry.placeLng,
                           }}
                         />
                         <form action={deleteVisit}>

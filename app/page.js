@@ -62,9 +62,6 @@ export default async function Home() {
           <div className="panel">
             <div className="panel-head">
               <h2>Latest Adventures</h2>
-              <button className="ghost-btn" type="button">
-                View Map
-              </button>
             </div>
             <div className="entries">
               {entries.length === 0 ? (
@@ -94,11 +91,17 @@ export default async function Home() {
                         {entry.note || "No notes yet."}
                       </p>
                       <div className="entry-footer">
-                        <span className="chip">
-                          Wesley {entry.wesleyRating ?? "N/A"}
+                        <span className="chip rating-chip">
+                          <span className="chip-label">W</span>
+                          <span className="chip-value">
+                            {entry.wesleyRating ?? "N/A"}
+                          </span>
                         </span>
-                        <span className="chip">
-                          Claire {entry.claireRating ?? "N/A"}
+                        <span className="chip rating-chip">
+                          <span className="chip-label">C</span>
+                          <span className="chip-value">
+                            {entry.claireRating ?? "N/A"}
+                          </span>
                         </span>
                       </div>
                       <div className="entry-actions">
@@ -118,8 +121,20 @@ export default async function Home() {
                         />
                         <form action={deleteVisit}>
                           <input type="hidden" name="id" value={entry.id} />
-                          <button type="submit" className="ghost-btn danger">
-                            Delete
+                          <button
+                            type="submit"
+                            className="ghost-btn icon-btn danger"
+                            aria-label="Delete"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              viewBox="0 0 24 24"
+                              focusable="false"
+                              className="icon"
+                            >
+                              <path d="M7 7h10l-1 12H8L7 7zm3-3h4l1 2H9l1-2zm8-1h-4l-1-2H11l-1 2H6v2h12V3z" />
+                            </svg>
+                            <span className="sr-only">Delete</span>
                           </button>
                         </form>
                       </div>

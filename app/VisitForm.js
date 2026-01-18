@@ -2,14 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import { supabaseClient } from "../lib/supabaseClient";
 
 const initialState = { status: "idle", message: "" };
 
-function SubmitButton({ label }) {
+function SubmitButton({ label, disabled }) {
   const { pending } = useFormStatus();
+  const isDisabled = pending || disabled;
 
   return (
-    <button type="submit" className="primary-btn" disabled={pending}>
+    <button type="submit" className="primary-btn" disabled={isDisabled}>
       {pending ? "Saving..." : label}
     </button>
   );
@@ -23,6 +25,8 @@ export default function VisitForm({
 }) {
   const formRef = useRef(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const [state, formAction] = useFormState(action, initialState);
 
   useEffect(() => {
@@ -32,10 +36,13 @@ export default function VisitForm({
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl("");
     }
+    if (uploadError) {
+      setUploadError("");
+    }
     if (onSuccess) {
       onSuccess();
     }
-  }, [state.status, previewUrl, onSuccess]);
+  }, [state.status, previewUrl, onSuccess, uploadError]);
 
   const handlePhotoChange = (event) => {
     const file = event.target.files?.[0];
@@ -52,12 +59,47 @@ export default function VisitForm({
     setPreviewUrl(URL.createObjectURL(file));
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setUploadError("");
+
+    const formData = new FormData(formRef.current);
+    const photoFile = formData.get("mealPhoto");
+
+    if (photoFile && photoFile.size > 0) {
+      setIsUploading(true);
+      const fileExtension = photoFile.name?.split(".").pop() || "jpg";
+      const filePath = `${crypto.randomUUID()}.${fileExtension}`;
+      const { error: uploadError } = await supabaseClient.storage
+        .from("meal-photos")
+        .upload(filePath, photoFile, {
+          contentType: photoFile.type || "image/jpeg",
+        });
+
+      if (uploadError) {
+        setIsUploading(false);
+        setUploadError("Photo upload failed. Try a smaller file.");
+        return;
+      }
+
+      const { data } = supabaseClient.storage
+        .from("meal-photos")
+        .getPublicUrl(filePath);
+      formData.set("photoUrl", data.publicUrl);
+      formData.delete("mealPhoto");
+      setIsUploading(false);
+    }
+
+    await formAction(formData);
+  };
+
   return (
     <form
       ref={formRef}
       className="log-form"
       autoComplete="off"
       action={formAction}
+      onSubmit={handleSubmit}
     >
       {initialValues?.id ? (
         <input type="hidden" name="id" value={initialValues.id} />
@@ -153,9 +195,15 @@ export default function VisitForm({
         </div>
       ) : null}
       <div className="form-actions">
-        <SubmitButton label={submitLabel} />
+        <SubmitButton label={submitLabel} disabled={isUploading} />
         {state.message ? (
           <p className={`form-message ${state.status}`}>{state.message}</p>
+        ) : null}
+        {isUploading ? (
+          <p className="form-message">Uploading photo…</p>
+        ) : null}
+        {uploadError ? (
+          <p className="form-message error">{uploadError}</p>
         ) : null}
       </div>
     </form>

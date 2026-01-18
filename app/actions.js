@@ -1,6 +1,5 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "../lib/supabaseServer";
 
@@ -8,30 +7,6 @@ const normalizeText = (value) => {
   if (!value) return null;
   const trimmed = value.toString().trim();
   return trimmed.length > 0 ? trimmed : null;
-};
-
-const uploadPhoto = async (supabase, mealPhoto) => {
-  if (!mealPhoto || typeof mealPhoto !== "object" || mealPhoto.size === 0) {
-    return null;
-  }
-
-  const fileExtension = mealPhoto.name?.split(".").pop() || "jpg";
-  const filePath = `${randomUUID()}.${fileExtension}`;
-  const arrayBuffer = await mealPhoto.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-
-  const { error: uploadError } = await supabase.storage
-    .from("meal-photos")
-    .upload(filePath, buffer, {
-      contentType: mealPhoto.type || "image/jpeg",
-    });
-
-  if (uploadError) {
-    return null;
-  }
-
-  const { data } = supabase.storage.from("meal-photos").getPublicUrl(filePath);
-  return data.publicUrl;
 };
 
 export async function addVisit(prevState, formData) {
@@ -43,12 +18,11 @@ export async function addVisit(prevState, formData) {
   const wesleyRatingValue = normalizeText(formData.get("wesleyRating"));
   const claireRatingValue = normalizeText(formData.get("claireRating"));
   const notes = normalizeText(formData.get("notes"));
+  const photoUrl = normalizeText(formData.get("photoUrl"));
 
   if (!restaurantName || !visitDate) {
     return { status: "error", message: "Add a name and date to log a visit." };
   }
-
-  const photoUrl = await uploadPhoto(supabase, formData.get("mealPhoto"));
 
   const { error } = await supabase.from("restaurant_visits").insert({
     restaurant_name: restaurantName,
@@ -82,12 +56,11 @@ export async function updateVisit(prevState, formData) {
   const wesleyRatingValue = normalizeText(formData.get("wesleyRating"));
   const claireRatingValue = normalizeText(formData.get("claireRating"));
   const notes = normalizeText(formData.get("notes"));
+  const photoUrl = normalizeText(formData.get("photoUrl"));
 
   if (!restaurantName || !visitDate) {
     return { status: "error", message: "Add a name and date to save changes." };
   }
-
-  const photoUrl = await uploadPhoto(supabase, formData.get("mealPhoto"));
 
   const updates = {
     restaurant_name: restaurantName,

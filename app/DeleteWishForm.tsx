@@ -8,14 +8,14 @@ type ActionState = {
   message: string;
 };
 
-type DeleteVisitFormProps = {
+type DeleteWishFormProps = {
   action: (prevState: ActionState, formData: FormData) => Promise<ActionState>;
   id: string;
 };
 
 const initialState: ActionState = { status: "idle", message: "" };
 
-export default function DeleteVisitForm({ action, id }: DeleteVisitFormProps) {
+export default function DeleteWishForm({ action, id }: DeleteWishFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [state, formAction, isPending] = useActionState(action, initialState);
 

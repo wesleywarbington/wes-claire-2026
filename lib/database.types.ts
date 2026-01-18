@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      future_spots: {
+        Row: {
+          created_at: string
+          id: string
+          neighborhood: string | null
+          notes: string | null
+          place_address: string | null
+          place_id: string | null
+          place_lat: number | null
+          place_lng: number | null
+          place_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          neighborhood?: string | null
+          notes?: string | null
+          place_address?: string | null
+          place_id?: string | null
+          place_lat?: number | null
+          place_lng?: number | null
+          place_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          neighborhood?: string | null
+          notes?: string | null
+          place_address?: string | null
+          place_id?: string | null
+          place_lat?: number | null
+          place_lng?: number | null
+          place_name?: string
+        }
+        Relationships: []
+      }
       restaurant_visits: {
         Row: {
           claire_rating: number | null

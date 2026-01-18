@@ -139,7 +139,7 @@ export default function VisitForm({
         <label className="field">
           <span>Wesley rating</span>
           <div className="rating">
-            {[1, 2, 3, 4, 5].map((value) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
               <label className="rating-pill" key={`wesley-${value}`}>
                 <input
                   type="radio"
@@ -155,7 +155,7 @@ export default function VisitForm({
         <label className="field">
           <span>Claire rating</span>
           <div className="rating">
-            {[1, 2, 3, 4, 5].map((value) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
               <label className="rating-pill" key={`claire-${value}`}>
                 <input
                   type="radio"

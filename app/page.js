@@ -47,7 +47,7 @@ export default async function Home() {
         <header className="hero">
           <div>
             <p className="eyebrow">Atlanta Restaurant Log</p>
-            <h1>Two weeks. One new table. Every time.</h1>
+            <h1>26 new spots in 2026</h1>
             <div className="hero-actions">
               <div className="hero-metrics">
                 <span>{entries.length} places logged</span>

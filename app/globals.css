@@ -619,6 +619,10 @@ h1 {
     align-items: stretch;
   }
 
+  .entries {
+    grid-template-columns: 1fr;
+  }
+
   .primary-btn,
   .entry-actions .ghost-btn {
     width: 100%;

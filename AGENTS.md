@@ -1,6 +1,7 @@
 <INSTRUCTIONS>
 ## Global rules
 - Always use Context7 MCP for library/API documentation, code generation, and setup/configuration steps unless explicitly told not to.
+- Ensure new UI changes include a quick mobile layout check (stacking, spacing, tap targets) to avoid cramped layouts.
 ## Available MCP servers
 - context7
 - supabase

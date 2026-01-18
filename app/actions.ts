@@ -23,6 +23,7 @@ export async function addVisit(
   const restaurantName = normalizeText(formData.get("restaurantName"));
   const neighborhood = normalizeText(formData.get("neighborhood"));
   const visitDate = normalizeText(formData.get("visitDate"));
+  const mealCostValue = normalizeText(formData.get("mealCost"));
   const wesleyRatingValue = normalizeText(formData.get("wesleyRating"));
   const claireRatingValue = normalizeText(formData.get("claireRating"));
   const notes = normalizeText(formData.get("notes"));
@@ -36,10 +37,16 @@ export async function addVisit(
     return { status: "error", message: "Add a name and date to log a visit." };
   }
 
+  const mealCost =
+    mealCostValue && !Number.isNaN(Number(mealCostValue))
+      ? Number(mealCostValue)
+      : null;
+
   const { error } = await supabase.from("restaurant_visits").insert({
     restaurant_name: restaurantName,
     neighborhood,
     visited_on: visitDate,
+    meal_cost: mealCost,
     wesley_rating: wesleyRatingValue ? Number(wesleyRatingValue) : null,
     claire_rating: claireRatingValue ? Number(claireRatingValue) : null,
     notes,
@@ -72,6 +79,7 @@ export async function updateVisit(
   const restaurantName = normalizeText(formData.get("restaurantName"));
   const neighborhood = normalizeText(formData.get("neighborhood"));
   const visitDate = normalizeText(formData.get("visitDate"));
+  const mealCostValue = normalizeText(formData.get("mealCost"));
   const wesleyRatingValue = normalizeText(formData.get("wesleyRating"));
   const claireRatingValue = normalizeText(formData.get("claireRating"));
   const notes = normalizeText(formData.get("notes"));
@@ -85,10 +93,16 @@ export async function updateVisit(
     return { status: "error", message: "Add a name and date to save changes." };
   }
 
+  const mealCost =
+    mealCostValue && !Number.isNaN(Number(mealCostValue))
+      ? Number(mealCostValue)
+      : null;
+
   const updates = {
     restaurant_name: restaurantName,
     neighborhood,
     visited_on: visitDate,
+    meal_cost: mealCost,
     wesley_rating: wesleyRatingValue ? Number(wesleyRatingValue) : null,
     claire_rating: claireRatingValue ? Number(claireRatingValue) : null,
     notes,
@@ -96,11 +110,8 @@ export async function updateVisit(
     place_address: placeAddress,
     place_lat: placeLatValue ? Number(placeLatValue) : null,
     place_lng: placeLngValue ? Number(placeLngValue) : null,
+    ...(photoUrl ? { photo_url: photoUrl } : {}),
   };
-
-  if (photoUrl) {
-    updates.photo_url = photoUrl;
-  }
 
   const { error } = await supabase
     .from("restaurant_visits")

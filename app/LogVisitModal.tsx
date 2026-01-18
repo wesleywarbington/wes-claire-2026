@@ -15,14 +15,9 @@ type LogVisitModalProps = {
 
 export default function LogVisitModal({ action }: LogVisitModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -63,7 +58,9 @@ export default function LogVisitModal({ action }: LogVisitModalProps) {
       <button className="primary-btn" type="button" onClick={handleOpen}>
         Add a new visit
       </button>
-      {mounted && modalContent ? createPortal(modalContent, document.body) : null}
+      {typeof document !== "undefined" && modalContent
+        ? createPortal(modalContent, document.body)
+        : null}
     </>
   );
 }

@@ -14,6 +14,7 @@ type VisitFormInitialValues = {
   restaurantName: string;
   neighborhood: string;
   visitDate: string;
+  mealCost?: number | null;
   wesleyRating: number | null;
   claireRating: number | null;
   notes: string;
@@ -33,14 +34,9 @@ export default function EditVisitModal({
   initialValues,
 }: EditVisitModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -94,7 +90,9 @@ export default function EditVisitModal({
         </svg>
         <span className="sr-only">Edit</span>
       </button>
-      {mounted && modalContent ? createPortal(modalContent, document.body) : null}
+      {typeof document !== "undefined" && modalContent
+        ? createPortal(modalContent, document.body)
+        : null}
     </>
   );
 }

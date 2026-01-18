@@ -19,6 +19,7 @@ export type Database = {
           claire_rating: number | null
           created_at: string
           id: string
+          meal_cost: number | null
           neighborhood: string | null
           notes: string | null
           photo_url: string | null
@@ -34,6 +35,7 @@ export type Database = {
           claire_rating?: number | null
           created_at?: string
           id?: string
+          meal_cost?: number | null
           neighborhood?: string | null
           notes?: string | null
           photo_url?: string | null
@@ -49,6 +51,7 @@ export type Database = {
           claire_rating?: number | null
           created_at?: string
           id?: string
+          meal_cost?: number | null
           neighborhood?: string | null
           notes?: string | null
           photo_url?: string | null

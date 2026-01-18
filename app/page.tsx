@@ -12,12 +12,16 @@ export default async function Home() {
     day: "numeric",
     year: "numeric",
   });
+  const currencyFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
 
   const supabase = createSupabaseServerClient();
   const { data } = await supabase
     .from("restaurant_visits")
     .select(
-      "id, restaurant_name, neighborhood, visited_on, wesley_rating, claire_rating, notes, photo_url, place_id, place_address, place_lat, place_lng, created_at"
+      "id, restaurant_name, neighborhood, visited_on, meal_cost, wesley_rating, claire_rating, notes, photo_url, place_id, place_address, place_lat, place_lng, created_at"
     )
     .order("visited_on", { ascending: false })
     .order("created_at", { ascending: false });
@@ -27,6 +31,7 @@ export default async function Home() {
     name: entry.restaurant_name,
     neighborhood: entry.neighborhood,
     date: entry.visited_on ? new Date(entry.visited_on) : null,
+    mealCost: entry.meal_cost,
     note: entry.notes,
     wesleyRating: entry.wesley_rating,
     claireRating: entry.claire_rating,
@@ -127,6 +132,15 @@ export default async function Home() {
                             {entry.claireRating ?? "N/A"}
                           </span>
                         </span>
+                        {entry.mealCost !== null &&
+                        entry.mealCost !== undefined ? (
+                          <span className="chip rating-chip">
+                            <span className="chip-label">Cost</span>
+                            <span className="chip-value">
+                              {currencyFormatter.format(entry.mealCost)}
+                            </span>
+                          </span>
+                        ) : null}
                       </div>
                       <div className="entry-actions">
                         <EditVisitModal
@@ -138,6 +152,7 @@ export default async function Home() {
                             visitDate: entry.date
                               ? entry.date.toISOString().split("T")[0]
                               : "",
+                            mealCost: entry.mealCost ?? null,
                             wesleyRating: entry.wesleyRating,
                             claireRating: entry.claireRating,
                             notes: entry.note ?? "",

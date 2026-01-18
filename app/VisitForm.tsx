@@ -24,6 +24,7 @@ type VisitFormInitialValues = {
   restaurantName?: string;
   neighborhood?: string;
   visitDate?: string;
+  mealCost?: number | null;
   wesleyRating?: number | null;
   claireRating?: number | null;
   notes?: string;
@@ -334,6 +335,18 @@ export default function VisitForm({
             defaultValue={initialValues?.neighborhood ?? ""}
           />
         </label>
+        <label className="field">
+          <span>Meal cost</span>
+          <input
+            type="number"
+            name="mealCost"
+            autoComplete="off"
+            placeholder="e.g. 42.50"
+            step="0.01"
+            min="0"
+            defaultValue={initialValues?.mealCost ?? ""}
+          />
+        </label>
       </div>
       <div className="field-row rating-rows">
         <label className="field">
@@ -372,7 +385,7 @@ export default function VisitForm({
       <label className="field">
         <span>Thoughts</span>
         <textarea
-          rows="4"
+          rows={4}
           name="notes"
           autoComplete="off"
           placeholder="Best bites, vibes, and the dish we'd order again…"

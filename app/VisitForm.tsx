@@ -1,10 +1,17 @@
 "use client";
 
-import { startTransition, useActionState, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useFormStatus } from "react-dom";
 import Image from "next/image";
 import { supabaseClient } from "../lib/supabaseClient";
+import PasswordPrompt from "./PasswordPrompt";
 
 type ActionState = {
   status: "idle" | "success" | "error";
@@ -43,13 +50,21 @@ type VisitFormProps = {
 
 const initialState: ActionState = { status: "idle", message: "" };
 
-function SubmitButton({ label, disabled }: { label: string; disabled: boolean }) {
+function SubmitButton({
+  label,
+  disabled,
+  isSubmitting = false,
+}: {
+  label: string;
+  disabled: boolean;
+  isSubmitting?: boolean;
+}) {
   const { pending } = useFormStatus();
-  const isDisabled = pending || disabled;
+  const isDisabled = pending || disabled || isSubmitting;
 
   return (
     <button type="submit" className="primary-btn" disabled={isDisabled}>
-      {pending ? "Saving..." : label}
+      {pending || isSubmitting ? "Saving..." : label}
     </button>
   );
 }
@@ -65,11 +80,12 @@ export default function VisitForm({
   const [previewUrl, setPreviewUrl] = useState("");
   const [uploadError, setUploadError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [state, formAction] = useActionState(action, initialState);
+  const [state, formAction, isPending] = useActionState(action, initialState);
   const [placeQuery, setPlaceQuery] = useState("");
   const [placeResults, setPlaceResults] = useState<PlaceResult[]>([]);
   const [placeError, setPlaceError] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [isPasswordPromptOpen, setIsPasswordPromptOpen] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(
     initialValues?.placeId
       ? {
@@ -165,10 +181,17 @@ export default function VisitForm({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsPasswordPromptOpen(true);
+  };
+
+  const handlePasswordConfirm = async (password: string) => {
     setUploadError("");
 
-    if (!formRef.current) return;
+    if (!formRef.current) {
+      return;
+    }
     const formData = new FormData(formRef.current);
+    formData.set("editPassword", password);
     const photoFile = formData.get("mealPhoto");
 
     if (photoFile instanceof File && photoFile.size > 0) {
@@ -415,7 +438,11 @@ export default function VisitForm({
         </div>
       ) : null}
       <div className="form-actions">
-        <SubmitButton label={submitLabel} disabled={isUploading} />
+        <SubmitButton
+          label={submitLabel}
+          disabled={isUploading || isPending}
+          isSubmitting={isUploading || isPending}
+        />
         {state.message ? (
           <p className={`form-message ${state.status}`}>{state.message}</p>
         ) : null}
@@ -426,6 +453,19 @@ export default function VisitForm({
           <p className="form-message error">{uploadError}</p>
         ) : null}
       </div>
+      {isPasswordPromptOpen ? (
+        <PasswordPrompt
+          isOpen
+          title="Confirm password"
+          confirmLabel={submitLabel}
+          onConfirm={handlePasswordConfirm}
+          onClose={() => setIsPasswordPromptOpen(false)}
+          isSubmitting={isUploading || isPending}
+          status={state}
+          size="compact"
+          showClose={false}
+        />
+      ) : null}
     </form>
   );
 }

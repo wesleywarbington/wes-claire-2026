@@ -8,16 +8,38 @@ type ActionState = {
   message: string;
 };
 
+const EDIT_PASSWORD = process.env.UI_EDIT_PASSWORD;
+
 const normalizeText = (value: FormDataEntryValue | null) => {
   if (!value) return null;
   const trimmed = value.toString().trim();
   return trimmed.length > 0 ? trimmed : null;
 };
 
+const getPasswordError = (formData: FormData): ActionState | null => {
+  const password = normalizeText(formData.get("editPassword"));
+  if (!EDIT_PASSWORD) {
+    return { status: "error", message: "Edit password not configured." };
+  }
+  if (!password) {
+    return {
+      status: "error",
+      message: "Password required to make changes.",
+    };
+  }
+  if (password !== EDIT_PASSWORD) {
+    return { status: "error", message: "Incorrect password." };
+  }
+  return null;
+};
+
 export async function addVisit(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const passwordError = getPasswordError(formData);
+  if (passwordError) return passwordError;
+
   const supabase = createSupabaseServerClient();
 
   const restaurantName = normalizeText(formData.get("restaurantName"));
@@ -69,6 +91,9 @@ export async function updateVisit(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const passwordError = getPasswordError(formData);
+  if (passwordError) return passwordError;
+
   const supabase = createSupabaseServerClient();
   const id = normalizeText(formData.get("id"));
 
@@ -126,12 +151,24 @@ export async function updateVisit(
   return { status: "success", message: "Visit updated." };
 }
 
-export async function deleteVisit(formData: FormData) {
+export async function deleteVisit(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const passwordError = getPasswordError(formData);
+  if (passwordError) return passwordError;
+
   const supabase = createSupabaseServerClient();
   const id = normalizeText(formData.get("id"));
 
-  if (!id) return;
+  if (!id) {
+    return { status: "error", message: "Missing visit details." };
+  }
 
-  await supabase.from("restaurant_visits").delete().eq("id", id);
+  const { error } = await supabase.from("restaurant_visits").delete().eq("id", id);
+  if (error) {
+    return { status: "error", message: "Could not delete the visit." };
+  }
   revalidatePath("/");
+  return { status: "success", message: "Visit deleted." };
 }

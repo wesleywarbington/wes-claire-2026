@@ -1,5 +1,6 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { addVisit, deleteVisit, updateVisit } from "./actions";
+import DeleteVisitForm from "./DeleteVisitForm";
 import EditVisitModal from "./EditVisitModal";
 import LogVisitModal from "./LogVisitModal";
 import { createSupabaseServerClient } from "../lib/supabaseServer";
@@ -162,24 +163,7 @@ export default async function Home() {
                             placeLng: entry.placeLng,
                           }}
                         />
-                        <form action={deleteVisit}>
-                          <input type="hidden" name="id" value={entry.id} />
-                          <button
-                            type="submit"
-                            className="ghost-btn icon-btn danger"
-                            aria-label="Delete"
-                          >
-                            <svg
-                              aria-hidden="true"
-                              viewBox="0 0 24 24"
-                              focusable="false"
-                              className="icon"
-                            >
-                              <path d="M7 7h10l-1 12H8L7 7zm3-3h4l1 2H9l1-2zm8-1h-4l-1-2H11l-1 2H6v2h12V3z" />
-                            </svg>
-                            <span className="sr-only">Delete</span>
-                          </button>
-                        </form>
+                        <DeleteVisitForm action={deleteVisit} id={entry.id} />
                       </div>
                     </div>
                   </article>

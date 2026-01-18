@@ -189,6 +189,10 @@ h1 {
   overflow-y: auto;
 }
 
+.modal-compact {
+  width: min(520px, 100%);
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;

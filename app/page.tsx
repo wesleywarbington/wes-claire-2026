@@ -12,6 +12,7 @@ import EditVisitModal from "./EditVisitModal";
 import LogVisitModal from "./LogVisitModal";
 import MapTabs from "./MapTabs";
 import MapView from "./MapView";
+import PickTonight from "./PickTonight";
 import WishListModal from "./WishListModal";
 import { createSupabaseServerClient } from "../lib/supabaseServer";
 
@@ -69,6 +70,13 @@ export default async function Home() {
     placeAddress: entry.place_address,
     placeLat: entry.place_lat,
     placeLng: entry.place_lng,
+  }));
+  const wishPlaces = wishList.map((place) => ({
+    id: place.id,
+    name: place.name,
+    neighborhood: place.neighborhood ?? null,
+    placeId: place.placeId ?? null,
+    placeAddress: place.placeAddress ?? null,
   }));
 
   const neighborhoodsCovered = new Set(
@@ -235,6 +243,7 @@ export default async function Home() {
               <div className="panel">
                 <div className="wish-panel">
                   <div className="wish-toolbar">
+                    <PickTonight places={wishPlaces} />
                     <WishListModal action={addWish} />
                   </div>
                   <div className="wish-list">

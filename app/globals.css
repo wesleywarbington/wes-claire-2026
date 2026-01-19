@@ -212,7 +212,10 @@ h1 {
 
 .wish-toolbar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .wish-list {
@@ -257,6 +260,28 @@ h1 {
   padding-top: 2px;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.pick-tonight {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.pick-result {
+  display: grid;
+  gap: 2px;
+}
+
+.pick-title {
+  font-weight: 600;
+}
+
+.pick-meta,
+.pick-hint {
+  font-size: 0.85rem;
+  color: rgba(36, 31, 26, 0.65);
 }
 
 .panel-head {

@@ -26,8 +26,9 @@ type PlaceResult = {
   lng: number | null;
 };
 
-type VisitFormInitialValues = {
+export type VisitFormInitialValues = {
   id?: string;
+  wishId?: string;
   restaurantName?: string;
   neighborhood?: string;
   visitDate?: string;
@@ -256,6 +257,9 @@ export default function VisitForm({
     >
       {initialValues?.id ? (
         <input type="hidden" name="id" value={initialValues.id} />
+      ) : null}
+      {initialValues?.wishId ? (
+        <input type="hidden" name="wishId" value={initialValues.wishId} />
       ) : null}
       <label className="field">
         <span>Search Google Maps</span>

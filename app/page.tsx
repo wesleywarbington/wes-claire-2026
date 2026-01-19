@@ -275,6 +275,23 @@ export default async function Home() {
                             </p>
                           </div>
                           <div className="wish-actions">
+                            <LogVisitModal
+                              action={addVisit}
+                              buttonLabel="Log visit"
+                              buttonClassName="ghost-btn"
+                              submitLabel="Log visit"
+                              title="Log from wishlist"
+                              initialValues={{
+                                wishId: place.id,
+                                restaurantName: place.name,
+                                neighborhood: place.neighborhood ?? "",
+                                notes: place.notes ?? "",
+                                placeId: place.placeId ?? undefined,
+                                placeAddress: place.placeAddress ?? undefined,
+                                placeLat: place.placeLat ?? null,
+                                placeLng: place.placeLng ?? null,
+                              }}
+                            />
                             <DeleteWishForm action={deleteWish} id={place.id} />
                           </div>
                         </article>

@@ -54,6 +54,7 @@ export async function addVisit(
   const placeAddress = normalizeText(formData.get("placeAddress"));
   const placeLatValue = normalizeText(formData.get("placeLat"));
   const placeLngValue = normalizeText(formData.get("placeLng"));
+  const wishId = normalizeText(formData.get("wishId"));
 
   if (!restaurantName || !visitDate) {
     return { status: "error", message: "Add a name and date to log a visit." };
@@ -83,8 +84,27 @@ export async function addVisit(
     return { status: "error", message: "Could not save the visit yet." };
   }
 
+  if (wishId) {
+    const { error: wishError } = await supabase
+      .from("future_spots")
+      .delete()
+      .eq("id", wishId);
+    if (wishError) {
+      revalidatePath("/");
+      return {
+        status: "success",
+        message: "Visit saved. Remove the wishlist item manually.",
+      };
+    }
+  }
+
   revalidatePath("/");
-  return { status: "success", message: "Visit saved. Great pick!" };
+  return {
+    status: "success",
+    message: wishId
+      ? "Visit saved and removed from the wishlist."
+      : "Visit saved. Great pick!",
+  };
 }
 
 export async function updateVisit(
